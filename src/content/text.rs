@@ -1,5 +1,6 @@
 use crossterm::style::{Color, SetBackgroundColor, SetForegroundColor};
 
+#[derive(Clone)]
 pub struct Text {
     pub text: String,
     pub foreground_color: Color,

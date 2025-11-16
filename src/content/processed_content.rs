@@ -1,5 +1,6 @@
 use crate::{content::Content, element::Element};
 
+#[derive(Clone)]
 pub struct ProcessedContent {
     pub content: Content,
     pub position: (u16, u16),

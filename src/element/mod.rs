@@ -23,17 +23,17 @@ pub use group::GROUP;
 #[derive(Clone)]
 pub struct Element {
     render_func: fn(holder: &mut Element,  page: &mut Page, args: Vec<Value>, parent_size: &(u16, u16), timer: &u32) -> Content,
-    args: Vec<Value>,
+    pub args: Vec<Value>,
     pub children: Vec<Element>,
     prepare_children_func: fn(&Vec<Value>, &Page) -> Vec<Element>,
-    element_tag: String,
+    element_tag: &'static str,
 }
 
 impl Element {
-    pub fn new(render_func: fn(holder: &mut Element, page: &mut Page, args: Vec<Value>, parent_size: &(u16, u16), timer: &u32) -> Content, args: Vec<Value>, prepare_children_function: fn(&Vec<Value>, &Page) -> Vec<Element>, element_tag: String) -> Self {
+    pub fn new(render_func: fn(holder: &mut Element, page: &mut Page, args: Vec<Value>, parent_size: &(u16, u16), timer: &u32) -> Content, args: Vec<Value>, prepare_children_function: fn(&Vec<Value>, &Page) -> Vec<Element>, element_tag: &'static str) -> Self {
         Element {render_func, args, children: Vec::new(), prepare_children_func: prepare_children_function, element_tag}
     }
-    pub fn new_default(render_func: fn(holder: &mut Element, page: &mut Page, args: Vec<Value>, parent_size: &(u16, u16), timer: &u32) -> Content, element_tag: String) -> Self {
+    pub fn new_default(render_func: fn(holder: &mut Element, page: &mut Page, args: Vec<Value>, parent_size: &(u16, u16), timer: &u32) -> Content, element_tag: &'static str) -> Self {
         Element {render_func, args: Vec::new(), children: Vec::new(), prepare_children_func: |args: &Vec<Value>, _| -> Vec<Element> {return Vec::new()}, element_tag}
     }
     pub fn new_from(&self, args: Vec<Value>) -> Self {
