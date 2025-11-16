@@ -21,7 +21,7 @@ pub static GROUP: LazyLock<Element> = LazyLock::new(|| {
 
             let body_raw: Vec<Value> = args.get(0).unwrap_or(&Value::Array(vec![])).as_array().unwrap().to_vec();
 
-            let mut body: Vec<Element> = parse_vec_to_vec(body_raw);
+            let mut body: Vec<Element> = parse_vec_to_vec(body_raw, &page.registry);
 
             let mut rendered_content: Vec<Content> = Vec::new();
 
@@ -74,8 +74,8 @@ pub static GROUP: LazyLock<Element> = LazyLock::new(|| {
             border_builder.build(true, (parent_size.0, lines))
         },
         vec![],
-        |args: &Vec<Value>| {
-            parse_vec_to_vec((*args.get(0).unwrap_or(&Value::Array(vec![])).as_array().unwrap_or(&vec![])).clone())
+        |args: &Vec<Value>, page: &Page| {
+            parse_vec_to_vec((*args.get(0).unwrap_or(&Value::Array(vec![])).as_array().unwrap_or(&vec![])).clone(), &page.registry)
         }, "group".to_string()
     )
 });

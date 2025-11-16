@@ -146,7 +146,7 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
         border.push_str(&horizontal_char.to_string().repeat(width - 2));
         border.push(bottom_right);
         border_builder.build(true, (parent_size.0, lines + 2))
-    }, vec![], |args: &Vec<Value>| {
-        parse_vec_to_vec((*args.get(0).unwrap_or(&Value::Array(vec![])).as_array().unwrap_or(&vec![])).clone())
+    }, vec![], |args: &Vec<Value>, page: &Page| {
+        parse_vec_to_vec((*args.get(0).unwrap_or(&Value::Array(vec![])).as_array().unwrap_or(&vec![])).clone(), &page.registry)
     }, "border".to_string())
 });
