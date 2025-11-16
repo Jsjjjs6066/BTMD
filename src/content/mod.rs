@@ -1,5 +1,6 @@
 pub mod text;
 pub mod content_builder;
+pub mod processed_content;
 
 pub use text::Text;
 pub use content_builder::ContentBuilder;
