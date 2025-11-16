@@ -11,6 +11,6 @@ pub static NEW_LINE: LazyLock<Element> = LazyLock::new(||
                 false,
                 (0, 0)
             )
-        }, "new_line".to_string()
+        }, "new_line"
     )
 );

@@ -7,6 +7,6 @@ pub static NONE: LazyLock<Element> = LazyLock::new(||
             vec![Text::new_default(String::new())], 
             false,
             (0, 0)
-        ), "none".to_string()
+        ), "none"
     )
 );

@@ -76,6 +76,6 @@ pub static GROUP: LazyLock<Element> = LazyLock::new(|| {
         vec![],
         |args: &Vec<Value>, page: &Page| {
             parse_vec_to_vec((*args.get(0).unwrap_or(&Value::Array(vec![])).as_array().unwrap_or(&vec![])).clone(), &page.registry)
-        }, "group".to_string()
+        }, "group"
     )
 });

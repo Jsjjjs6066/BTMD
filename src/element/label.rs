@@ -18,6 +18,6 @@ pub static LABEL: LazyLock<Element> = LazyLock::new(|| {
                 false,
                 (min(text.chars().count() as u16, parent_size.0), text.lines().count() as u16),
             )
-        }, "label".to_string()
+        }, "label"
     )
 });

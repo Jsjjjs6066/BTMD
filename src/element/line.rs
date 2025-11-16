@@ -24,6 +24,6 @@ pub static LINE: LazyLock<Element> = LazyLock::new(||
                  (parent_size.0, 1));
             }
             Content::new(vec![Text::new_default(char.repeat(parent_size.0 as usize))], true, (parent_size.0, 1))
-        }, "line".to_string()
+        }, "line"
     )
 );

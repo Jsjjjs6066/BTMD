@@ -71,6 +71,6 @@ pub static HEADING: LazyLock<Element> = LazyLock::new(|| {
                 ),
             )
         },
-        "heading".to_string(),
+        "heading",
     )
 });
