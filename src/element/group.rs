@@ -1,14 +1,25 @@
-use std::sync::LazyLock;
 use serde_json::{Map, Value};
+use std::sync::LazyLock;
 
-use crate::{parse::parse_vec_to_vec, content::Content, element::Element, page::Page};
 use crate::content::ContentBuilder;
+use crate::{content::Content, element::Element, page::Page, parse::parse_vec_to_vec};
 
 pub static GROUP: LazyLock<Element> = LazyLock::new(|| {
     Element::new(
-        |holder: &mut Element, page: &mut Page, args: Vec<Value>, parent_size: &(u16, u16), timer: &u32| {
+        |holder: &mut Element,
+         page: &mut Page,
+         args: Vec<Value>,
+         parent_size: &(u16, u16),
+         timer: &u32| {
             let mut default_config: Map<String, Value> = Map::new();
-            let config: Map<String, Value> = args.get(1).unwrap_or(&Value::Object(Map::new())).as_object().unwrap_or(&default_config).iter().map(|(k, v)| (k.clone(), v.clone())).collect();
+            let config: Map<String, Value> = args
+                .get(1)
+                .unwrap_or(&Value::Object(Map::new()))
+                .as_object()
+                .unwrap_or(&default_config)
+                .iter()
+                .map(|(k, v)| (k.clone(), v.clone()))
+                .collect();
             for (k, v) in config.iter() {
                 default_config.insert(k.clone(), v.clone());
             }
@@ -19,14 +30,19 @@ pub static GROUP: LazyLock<Element> = LazyLock::new(|| {
 
             let mut i: i32 = 0;
 
-            let body_raw: Vec<Value> = args.get(0).unwrap_or(&Value::Array(vec![])).as_array().unwrap().to_vec();
+            let body_raw: Vec<Value> = args
+                .get(0)
+                .unwrap_or(&Value::Array(vec![]))
+                .as_array()
+                .unwrap()
+                .to_vec();
 
             let mut body: Vec<Element> = parse_vec_to_vec(body_raw, &page.registry);
 
             let mut rendered_content: Vec<Content> = Vec::new();
 
-            for mut element in &holder.children {
-                rendered_content.push(element.to_owned().render(page, &(parent_size), timer));
+            for element in holder.children.iter_mut() {
+                rendered_content.push(element.render(page, &(parent_size), timer));
             }
 
             let mut lines: u16 = 1;
@@ -39,22 +55,23 @@ pub static GROUP: LazyLock<Element> = LazyLock::new(|| {
                             if i % parent_size.0 as i32 != 0 {
                                 temp.push_str(&*" ".repeat((width - (i) % width) as usize));
                                 i += width - (i - 1) % width;
-                                border_builder.append_text(temp, t.foreground_color, t.background_color);
+                                border_builder.append_text(
+                                    temp,
+                                    t.foreground_color,
+                                    t.background_color,
+                                );
                                 temp = String::new();
                                 lines += 1;
                             }
-                        }
-                        else if i % parent_size.0 as i32 == 0 {
+                        } else if i % parent_size.0 as i32 == 0 {
                             lines += 1;
                             i += 1;
                             temp.push(char);
-                        }
-                        else if char == '\t' {
+                        } else if char == '\t' {
                             let spaces: i32 = 4 - (i - 1) % 4;
                             temp.push_str(&*" ".repeat(spaces as usize));
                             i += spaces;
-                        }
-                        else {
+                        } else {
                             temp.push(char);
                             i += 1;
                         }
@@ -63,19 +80,26 @@ pub static GROUP: LazyLock<Element> = LazyLock::new(|| {
                 }
             }
 
-
-
-
             if !(i % width == 0) {
-                border_builder.append_text_default((&*" ".repeat((width - i % width) as usize)).to_string());
+                border_builder
+                    .append_text_default((&*" ".repeat((width - i % width) as usize)).to_string());
             }
-
 
             border_builder.build(true, (parent_size.0, lines))
         },
         vec![],
         |args: &Vec<Value>, page: &Page| {
-            parse_vec_to_vec((*args.get(0).unwrap_or(&Value::Array(vec![])).as_array().unwrap_or(&vec![])).clone(), &page.registry)
-        }, "group"
+            let res = parse_vec_to_vec(
+                (*args
+                    .get(0)
+                    .unwrap_or(&Value::Array(vec![]))
+                    .as_array()
+                    .unwrap_or(&vec![]))
+                .clone(),
+                &page.registry,
+            );
+            unsafe { std::mem::transmute(res) }
+        },
+        "group",
     )
 });

@@ -10,26 +10,26 @@ pub use content_builder::ContentBuilder;
 use crate::content::processed_content::ProcessedContent;
 
 #[derive(Clone)]
-pub struct Content {
+pub struct Content<'a> {
     pub text: Vec<Text>,
     pub rerender_needed: bool,
     pub size: (u16, u16),
-    pub children: Vec<ProcessedContent>,
+    pub children: Vec<ProcessedContent<'a>>,
     current_text_index: usize,
     current_char_index: usize,
 }
 
-impl Content {
+impl<'a> Content<'a> {
     pub fn new(text: Vec<Text>, rerender_needed: bool, 
-            size: (u16, u16)) -> Content {
+            size: (u16, u16)) -> Content<'a> {
         Content {text, rerender_needed, size, children: Vec::new(), current_text_index: 0, current_char_index: 0}
     }
 
-    pub fn add_child(mut self, child: ProcessedContent) -> Self {
+    pub fn add_child(mut self, child: ProcessedContent<'a>) -> Self {
         self.children.push(child);
         self
     }
-    pub fn add_children(mut self, children: Vec<ProcessedContent>) -> Self {
+    pub fn add_children(mut self, children: Vec<ProcessedContent<'a>>) -> Self {
         for child in children.deref() {
             self.children.push(child.clone());
         }
@@ -41,7 +41,7 @@ impl Content {
     }
 }
 
-impl Iterator for Content {
+impl<'a> Iterator for Content<'a> {
     type Item = char;
 
     fn next(&mut self) -> Option<Self::Item> {

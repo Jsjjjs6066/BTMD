@@ -2,12 +2,12 @@ use crossterm::style::Color;
 
 use crate::content::{Content, Text, processed_content::ProcessedContent};
 
-pub struct ContentBuilder {
+pub struct ContentBuilder<'a> {
     pub content: Vec<Text>,
-    pub children: Vec<ProcessedContent>,
+    pub children: Vec<ProcessedContent<'a>>,
 }
 
-impl ContentBuilder {
+impl<'a> ContentBuilder<'a> {
     pub fn new() -> Self {
         ContentBuilder { content: Vec::new(), children: Vec::new() }
     }
@@ -19,23 +19,25 @@ impl ContentBuilder {
         self.content.push(Text::new_default(text))
     }
 
-    pub fn add_child(mut self, child: ProcessedContent) -> Self {
+    pub fn add_child(mut self, child: ProcessedContent<'a>) -> Self {
         self.children.push(child);
         self
     }
-    pub fn add_children(mut self, children: Vec<ProcessedContent>) -> Self {
+    pub fn add_children(mut self, children: Vec<ProcessedContent<'a>>) -> Self {
         for child in children {
             self.children.push(child.clone());
         }
         self
     }
 
-    pub fn build(self, rerender_needed: bool, size: (u16, u16)) -> Content {
+    pub fn build(self, rerender_needed: bool, size: (u16, u16)) -> Content<'a> {
         Content {
             text: self.content,
             rerender_needed: rerender_needed,
             size,
             children: self.children,
+            current_text_index: 0,
+            current_char_index: 0,
         }
     }
 }
