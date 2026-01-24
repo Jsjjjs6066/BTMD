@@ -98,7 +98,7 @@ pub static GROUP: LazyLock<Element> = LazyLock::new(|| {
                 .clone(),
                 &page.registry,
             );
-            unsafe { std::mem::transmute(res) }
+            res
         },
         "group",
     )

@@ -2,6 +2,7 @@ use crate::{content::Content, page::Page};
 use std::marker::PhantomData;
 pub mod registry;
 use serde_json::Value;
+use std::fmt::Debug;
 
 pub mod border;
 pub mod group;
@@ -105,5 +106,15 @@ impl<'a> Element<'a> {
         timer: &u32,
     ) -> Content<'b> {
         (self.render_func)(self, page, self.args.clone(), parent_size, timer)
+    }
+}
+
+impl Debug for Element<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Element")
+            .field("args", &self.args)
+            .field("children", &self.children)
+            .field("element_tag", &self.element_tag)
+            .finish()
     }
 }
