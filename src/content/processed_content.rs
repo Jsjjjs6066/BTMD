@@ -1,18 +1,13 @@
-use crate::{content::Content, element::Element};
+use crate::content::Content;
 
 #[derive(Clone)]
-pub struct ProcessedContent<'a> {
-    pub content: Content<'a>,
+pub struct ProcessedContent {
+    pub content: Content,
     pub position: (u16, u16),
-    pub element: &'a Element<'a>,
 }
 
-impl<'a> ProcessedContent<'a> {
-    pub fn new(content: Content<'a>, position: (u16, u16), element: &'a Element) -> Self {
-        Self {
-            content,
-            position,
-            element,
-        }
+impl ProcessedContent {
+    pub fn new(content: Content, position: (u16, u16)) -> Self {
+        Self { content, position }
     }
 }

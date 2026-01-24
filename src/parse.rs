@@ -8,13 +8,13 @@ use crate::{
 };
 use serde_json::Value;
 
-pub fn parse_json_to_page<'a>(json_page: Value) -> Page<'a> {
+pub fn parse_json_to_page(json_page: Value) -> Page {
     let title: String = json_page["title"].as_str().unwrap_or("Page").to_string();
     let body_unparsed: Vec<Value> = json_page["body"].as_array().unwrap_or(&Vec::new()).to_vec();
 
-    let mut body: Vec<Element<'a>> = Vec::with_capacity(body_unparsed.len());
+    let mut body: Vec<Element> = Vec::with_capacity(body_unparsed.len());
 
-    let mut registry: ElementRegistry<'a> = ElementRegistry::new();
+    let mut registry: ElementRegistry = ElementRegistry::new();
     import_default_elements(&mut registry);
 
     for element in body_unparsed {
@@ -34,8 +34,8 @@ pub fn parse_str_to_page(input: &str) -> Page {
     parse_json_to_page(json_page)
 }
 
-pub fn parse_vec_to_vec<'a>(input: Vec<Value>, registry: &ElementRegistry<'a>) -> Vec<Element<'a>> {
-    let mut body: Vec<Element<'a>> = Vec::with_capacity(input.len());
+pub fn parse_vec_to_vec(input: Vec<Value>, registry: &ElementRegistry) -> Vec<Element> {
+    let mut body: Vec<Element> = Vec::with_capacity(input.len());
 
     for element in input {
         if let Some(arr) = element.as_array() {
@@ -49,7 +49,7 @@ pub fn parse_vec_to_vec<'a>(input: Vec<Value>, registry: &ElementRegistry<'a>) -
 
     body
 }
-pub fn parse_str_to_vec<'a>(input: &str, registry: &ElementRegistry<'a>) -> Vec<Element<'a>> {
+pub fn parse_str_to_vec(input: &str, registry: &ElementRegistry) -> Vec<Element> {
     let elements: Vec<Value> = serde_json::from_str(input)
         .unwrap_or(Value::Array(vec![]))
         .as_array()

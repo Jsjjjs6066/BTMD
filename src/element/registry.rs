@@ -1,26 +1,24 @@
 use std::collections::HashMap;
 
-use serde_json::de;
-
 use crate::element::Element;
 
 #[derive(Clone)]
-pub struct ElementRegistry<'a> {
-    registry: HashMap<String, Element<'a>>,
+pub struct ElementRegistry {
+    registry: HashMap<String, Element>,
 }
 
-impl<'a> ElementRegistry<'a> {
+impl ElementRegistry {
     pub fn new() -> Self {
         Self {
             registry: HashMap::new(),
         }
     }
 
-    pub fn register_element(&mut self, name: String, element: &'a Element<'a>) {
+    pub fn register_element(&mut self, name: String, element: &Element) {
         self.registry.insert(name, element.to_owned().clone());
     }
 
-    pub fn get_element(&self, name: &str) -> Element<'a> {
+    pub fn get_element(&self, name: &str) -> Element {
         self.registry
             .get(name)
             .or_else(|| self.registry.get("none"))

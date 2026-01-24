@@ -1,5 +1,5 @@
 use crate::{content::Content, page::Page};
-use std::marker::PhantomData;
+
 pub mod registry;
 use serde_json::Value;
 use std::fmt::Debug;
@@ -23,32 +23,31 @@ pub use none::NONE;
 pub use para::PARA;
 
 #[derive(Clone)]
-pub struct Element<'a> {
-    render_func: for<'b> fn(
-        holder: &'b mut Element,
+pub struct Element {
+    render_func: fn(
+        holder: &mut Element,
         page: &mut Page,
         args: Vec<Value>,
         parent_size: &(u16, u16),
         timer: &u32,
-    ) -> Content<'b>,
+    ) -> Content,
     pub args: Vec<Value>,
-    pub children: Vec<Element<'a>>,
-    prepare_children_func: fn(&Vec<Value>, &Page) -> Vec<Element<'a>>,
+    pub children: Vec<Element>,
+    prepare_children_func: fn(&Vec<Value>, &Page) -> Vec<Element>,
     element_tag: &'static str,
-    _marker: PhantomData<&'a ()>,
 }
 
-impl<'a> Element<'a> {
+impl Element {
     pub fn new(
-        render_func: for<'b> fn(
-            holder: &'b mut Element,
+        render_func: fn(
+            holder: &mut Element,
             page: &mut Page,
             args: Vec<Value>,
             parent_size: &(u16, u16),
             timer: &u32,
-        ) -> Content<'b>,
+        ) -> Content,
         args: Vec<Value>,
-        prepare_children_function: fn(&Vec<Value>, &Page) -> Vec<Element<'a>>,
+        prepare_children_function: fn(&Vec<Value>, &Page) -> Vec<Element>,
         element_tag: &'static str,
     ) -> Self {
         Element {
@@ -57,26 +56,24 @@ impl<'a> Element<'a> {
             children: Vec::new(),
             prepare_children_func: prepare_children_function,
             element_tag,
-            _marker: PhantomData,
         }
     }
     pub fn new_default(
-        render_func: for<'b> fn(
-            holder: &'b mut Element,
+        render_func: fn(
+            holder: &mut Element,
             page: &mut Page,
             args: Vec<Value>,
             parent_size: &(u16, u16),
             timer: &u32,
-        ) -> Content<'b>,
+        ) -> Content,
         element_tag: &'static str,
     ) -> Self {
         Element {
             render_func,
             args: Vec::new(),
             children: Vec::new(),
-            prepare_children_func: |args: &Vec<Value>, _| -> Vec<Element<'a>> { return Vec::new() },
+            prepare_children_func: |args: &Vec<Value>, _| -> Vec<Element> { return Vec::new() },
             element_tag,
-            _marker: PhantomData,
         }
     }
     pub fn new_from(&self, args: Vec<Value>) -> Self {
@@ -87,29 +84,21 @@ impl<'a> Element<'a> {
     }
 
     fn prepare_children(&mut self, page: &Page) {
-        self.children = (self.prepare_children_func)(&self.args, page);
+        if self.children.is_empty() {
+            self.children = (self.prepare_children_func)(&self.args, page);
+        }
     }
 
-    pub fn render<'b>(
-        &'b mut self,
-        page: &mut Page,
-        parent_size: &(u16, u16),
-        timer: &u32,
-    ) -> Content<'b> {
+    pub fn render(&mut self, page: &mut Page, parent_size: &(u16, u16), timer: &u32) -> Content {
         self.prepare_children(page);
         (self.render_func)(self, page, self.args.clone(), parent_size, timer)
     }
-    pub fn rerender<'b>(
-        &'b mut self,
-        page: &mut Page,
-        parent_size: &(u16, u16),
-        timer: &u32,
-    ) -> Content<'b> {
+    pub fn rerender(&mut self, page: &mut Page, parent_size: &(u16, u16), timer: &u32) -> Content {
         (self.render_func)(self, page, self.args.clone(), parent_size, timer)
     }
 }
 
-impl Debug for Element<'_> {
+impl Debug for Element {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Element")
             .field("args", &self.args)

@@ -81,12 +81,6 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
 
             let mut i = 1;
 
-            let first_child_ptr = if !holder.children.is_empty() {
-                Some(&holder.children[0] as *const Element)
-            } else {
-                None
-            };
-
             let mut rendered_content: Vec<Content> = Vec::new();
             for element in holder.children.iter_mut() {
                 rendered_content.push(element.render(
@@ -98,7 +92,7 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
 
             let mut lines: u16 = 1;
 
-            for c in rendered_content.iter() {
+            for c in rendered_content.into_iter() {
                 for t in &c.text {
                     let mut temp: String = String::new();
                     for char in t.text.chars() {
@@ -179,10 +173,7 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
                         border_builder.append_text(temp, t.foreground_color, t.background_color);
                     }
                 }
-                border_builder =
-                    border_builder.add_child(ProcessedContent::new(c.to_owned(), (0, 0), unsafe {
-                        &*first_child_ptr.unwrap()
-                    }));
+                border_builder = border_builder.add_child(ProcessedContent::new(c, (0, 0)));
             }
 
             if (i - 1) % width == 0 {
