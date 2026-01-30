@@ -42,6 +42,7 @@ impl ContentBuilder {
             children: self.children,
             current_text_index: 0,
             current_char_index: 0,
+            position: None,
         }
     }
 }

@@ -1,4 +1,3 @@
-use crossterm::style::ContentStyle;
 use serde_json::Value;
 
 use crate::{content::{Content, Text}, element::Element};

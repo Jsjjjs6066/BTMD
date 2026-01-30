@@ -1,7 +1,7 @@
 use crate::{
     element::{
         Element,
-        registry::{self, ElementRegistry},
+        registry::{ElementRegistry},
     },
     import_default_elements,
     page::Page,

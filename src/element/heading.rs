@@ -1,4 +1,4 @@
-use std::{cmp::{max, min}, fs::OpenOptions, io::Write};
+use std::{cmp::{max, min}};
 
 use crossterm::style::Color;
 use figlet_rs::FIGfont;

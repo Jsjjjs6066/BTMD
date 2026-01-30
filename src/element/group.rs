@@ -30,14 +30,14 @@ pub static GROUP: LazyLock<Element> = LazyLock::new(|| {
 
             let mut i: i32 = 0;
 
-            let body_raw: Vec<Value> = args
-                .get(0)
-                .unwrap_or(&Value::Array(vec![]))
-                .as_array()
-                .unwrap()
-                .to_vec();
+            // let body_raw: Vec<Value> = args
+            //     .get(0)
+            //     .unwrap_or(&Value::Array(vec![]))
+            //     .as_array()
+            //     .unwrap()
+            //     .to_vec();
 
-            let mut body: Vec<Element> = parse_vec_to_vec(body_raw, &page.registry);
+            // let body: Vec<Element> = parse_vec_to_vec(body_raw, &page.registry);
 
             let mut rendered_content: Vec<Content> = Vec::new();
 

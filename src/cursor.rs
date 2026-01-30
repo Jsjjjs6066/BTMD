@@ -1,3 +1,7 @@
+use std::collections::VecDeque;
+
+use crate::{page::Page};
+
 #[derive(Clone, Debug, Default)]
 pub struct Cursor {
     pub position: (u16, u16),
@@ -14,6 +18,24 @@ impl Cursor {
 
     pub fn get_position(&self) -> &(u16, u16) {
         &self.position
+    }
+
+    #[allow(unused)]
+    pub fn handle_interaction(&mut self, page: &mut Page) {
+        todo!();
+        let mut queue = VecDeque::new();  
+        for element in page.body.iter_mut() {
+            queue.push_back(element);
+        }
+
+        while let Some(node) = queue.pop_front() {
+            if let Some(size) = node.get_size() {
+                
+                for neighbor in node.children.iter_mut() {
+                    queue.push_back(neighbor);
+                }
+            }
+        }
     }
 
     pub fn move_up(&mut self, steps: u16) {

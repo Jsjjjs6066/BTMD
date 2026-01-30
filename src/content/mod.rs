@@ -15,6 +15,7 @@ pub struct Content {
     pub children: Vec<ProcessedContent>,
     current_text_index: usize,
     current_char_index: usize,
+    pub position: Option<(u16, u16)>,
 }
 
 impl Content {
@@ -26,6 +27,7 @@ impl Content {
             children: Vec::new(),
             current_text_index: 0,
             current_char_index: 0,
+            position: None,
         }
     }
 
@@ -40,7 +42,7 @@ impl Content {
         self
     }
 
-    pub fn render(&self, parent_size: &(u16, u16)) -> String {
+    pub fn render(&self) -> String {
         self.text
             .iter()
             .map(|content_type: &Text| content_type.render())

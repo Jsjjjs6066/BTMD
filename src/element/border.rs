@@ -1,6 +1,4 @@
-use std::{fs::OpenOptions, io::Write};
-
-use serde_json::{Map, Value};
+use serde_json::{Map, Value, json};
 
 use crate::{
     content::{Content, ContentBuilder, processed_content::ProcessedContent},
@@ -9,11 +7,11 @@ use crate::{
     parse::parse_vec_to_vec,
 };
 
-use crossterm::style::{Color, SetForegroundColor};
+use crossterm::style::{Color};
 use std::sync::LazyLock;
 
 pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
-    Element::new(
+    let mut e = Element::new(
         |holder: &mut Element,
          page: &mut Page,
          args: Vec<Value>,
@@ -205,7 +203,6 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
             if !(i % width == 0) {
                 border_builder
                     .append_text_default((&*" ".repeat(width - 1 - i % width)).to_string());
-                i += width - i % width;
                 if border_builder.content[border_builder.content.len() - 2]
                     .text
                     .chars()
@@ -274,5 +271,14 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
             unsafe { std::mem::transmute(res) }
         },
         "border",
-    )
+    );
+    e.set_on_hover_func(|holder: &mut Element, _, _, _| {
+        if holder.args.len() >= 2 {
+            if holder.args.iter().nth(1).unwrap().as_object().unwrap_or(&Map::new()).contains_key("onhover") {
+                let color: Value = holder.args.get(1).unwrap().as_object().unwrap().get("onhover").unwrap().as_object().unwrap().get("color").unwrap_or(&json!("default")).clone();
+                holder.args.iter_mut().nth(1).unwrap().as_object_mut().unwrap().insert("color".to_string(), color);
+            }
+        }
+    });
+    e
 });
