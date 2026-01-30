@@ -1,14 +1,14 @@
 use serde_json::{Map, Value, json};
 
 use crate::{
-    content::{Content, ContentBuilder, processed_content::ProcessedContent},
+    content::{Content, ContentBuilder},
     element::Element,
     page::Page,
     parse::parse_vec_to_vec,
 };
 
 use crossterm::style::{Color};
-use std::sync::LazyLock;
+use std::{cell::RefCell, sync::LazyLock};
 
 pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
     let mut e = Element::new(
@@ -171,7 +171,6 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
                         border_builder.append_text(temp, t.foreground_color, t.background_color);
                     }
                 }
-                border_builder = border_builder.add_child(ProcessedContent::new(c, (0, 0)));
             }
 
             if (i - 1) % width == 0 {
@@ -255,7 +254,7 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
             );
             border.push_str(&horizontal_char.to_string().repeat(width - 2));
             border.push(bottom_right);
-            border_builder.build(true, (parent_size.0, lines + 2))
+            border_builder.build(true, (parent_size.0, lines + 2), RefCell::new(holder.to_owned()))
         },
         vec![],
         |args: &Vec<Value>, page: &Page| {

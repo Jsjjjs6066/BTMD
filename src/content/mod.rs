@@ -1,45 +1,35 @@
 pub mod content_builder;
-pub mod processed_content;
 pub mod text;
+
+use std::cell::RefCell;
 
 pub use content_builder::ContentBuilder;
 pub use text::Text;
 
-use crate::content::processed_content::ProcessedContent;
+use crate::{element::Element};
 
 #[derive(Clone)]
 pub struct Content {
     pub text: Vec<Text>,
     pub rerender_needed: bool,
     pub size: (u16, u16),
-    pub children: Vec<ProcessedContent>,
     current_text_index: usize,
     current_char_index: usize,
     pub position: Option<(u16, u16)>,
+    pub holder: RefCell<Element>,
 }
 
 impl Content {
-    pub fn new(text: Vec<Text>, rerender_needed: bool, size: (u16, u16)) -> Content {
+    pub fn new(text: Vec<Text>, rerender_needed: bool, size: (u16, u16), holder: RefCell<Element>) -> Content {
         Content {
             text,
             rerender_needed,
             size,
-            children: Vec::new(),
             current_text_index: 0,
             current_char_index: 0,
             position: None,
+            holder,
         }
-    }
-
-    pub fn add_child(mut self, child: ProcessedContent) -> Self {
-        self.children.push(child);
-        self
-    }
-    pub fn add_children(mut self, children: Vec<ProcessedContent>) -> Self {
-        for child in children {
-            self.children.push(child.clone());
-        }
-        self
     }
 
     pub fn render(&self) -> String {

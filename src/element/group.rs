@@ -1,4 +1,5 @@
 use serde_json::{Map, Value};
+use std::cell::RefCell;
 use std::sync::LazyLock;
 
 use crate::content::ContentBuilder;
@@ -85,7 +86,7 @@ pub static GROUP: LazyLock<Element> = LazyLock::new(|| {
                     .append_text_default((&*" ".repeat((width - i % width) as usize)).to_string());
             }
 
-            border_builder.build(true, (parent_size.0, lines))
+            border_builder.build(true, (parent_size.0, lines), RefCell::new(holder.to_owned()))
         },
         vec![],
         |args: &Vec<Value>, page: &Page| {
