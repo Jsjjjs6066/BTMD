@@ -3,6 +3,7 @@ use std::cell::RefCell;
 use std::sync::LazyLock;
 
 use crate::content::ContentBuilder;
+use crate::logger;
 use crate::{content::Content, element::Element, page::Page, parse::parse_vec_to_vec};
 
 pub static GROUP: LazyLock<Element> = LazyLock::new(|| {
@@ -44,6 +45,23 @@ pub static GROUP: LazyLock<Element> = LazyLock::new(|| {
 
             for element in holder.children.iter_mut() {
                 rendered_content.push(element.render(page, &(parent_size), timer));
+                if let Some(e) = rendered_content.iter().nth_back(1) {
+                    rendered_content.last_mut().unwrap().position = Some((
+                        e.position.unwrap_or_default().0 + e.size.0,
+                        e.position.unwrap_or_default().1 + e.size.1 % (parent_size.1),
+                    ));
+                } else {
+                    rendered_content.last_mut().unwrap().position = Some((0, 0));
+                }
+                let pos = rendered_content.last().unwrap().position.unwrap();
+                rendered_content
+                    .last()
+                    .unwrap()
+                    .holder
+                    .borrow_mut()
+                    .position = pos;
+                element.position = pos;
+                logger::write_log(format!("{:#?}", element.position).as_bytes()).unwrap();
             }
 
             let mut lines: u16 = 1;
@@ -86,7 +104,11 @@ pub static GROUP: LazyLock<Element> = LazyLock::new(|| {
                     .append_text_default((&*" ".repeat((width - i % width) as usize)).to_string());
             }
 
-            border_builder.build(true, (parent_size.0, lines), RefCell::new(holder.to_owned()))
+            border_builder.build(
+                true,
+                (parent_size.0, lines),
+                RefCell::new(holder.to_owned()),
+            )
         },
         vec![],
         |args: &Vec<Value>, page: &Page| {
@@ -102,5 +124,6 @@ pub static GROUP: LazyLock<Element> = LazyLock::new(|| {
             res
         },
         "group",
+        (0, 0),
     )
 });

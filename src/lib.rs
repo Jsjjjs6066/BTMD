@@ -3,6 +3,7 @@ pub mod page;
 pub mod cursor;
 pub mod content;
 pub mod parse;
+pub mod logger;
 
 use crate::element::{registry::ElementRegistry};
 

@@ -3,11 +3,12 @@ use serde_json::{Map, Value, json};
 use crate::{
     content::{Content, ContentBuilder},
     element::Element,
+    logger,
     page::Page,
     parse::parse_vec_to_vec,
 };
 
-use crossterm::style::{Color};
+use crossterm::style::Color;
 use std::{cell::RefCell, sync::LazyLock};
 
 pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
@@ -86,6 +87,28 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
                     &(parent_size.0 - 2, parent_size.1 - 2),
                     timer,
                 ));
+                if let Some(e) = rendered_content.iter().nth_back(1) {
+                    rendered_content.last_mut().unwrap().position = Some((
+                        e.position.unwrap_or_default().0 + e.size.0 % (parent_size.1 - 2),
+                        e.position.unwrap_or_default().1 + e.size.1,
+                    ));
+                    // let mut bw = BufWriter::new(File::create("debug.log").unwrap());
+                    // bw.write_all(format!("{:#?}", rendered_content.last().unwrap().position).as_bytes()).unwrap();
+                    // bw.flush().unwrap();
+                    
+                }
+                else {
+                    rendered_content.last_mut().unwrap().position = Some((0, 0));
+                }
+                let pos = rendered_content.last().unwrap().position.unwrap();
+                rendered_content
+                    .last()
+                    .unwrap()
+                    .holder
+                    .borrow_mut()
+                    .position = pos;
+                element.position = pos;
+                logger::write_log(format!("{:#?}", element.position).as_bytes()).unwrap();
             }
 
             let mut lines: u16 = 1;
@@ -254,7 +277,11 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
             );
             border.push_str(&horizontal_char.to_string().repeat(width - 2));
             border.push(bottom_right);
-            border_builder.build(true, (parent_size.0, lines + 2), RefCell::new(holder.to_owned()))
+            border_builder.build(
+                true,
+                (parent_size.0, lines + 2),
+                RefCell::new(holder.to_owned()),
+            )
         },
         vec![],
         |args: &Vec<Value>, page: &Page| {
@@ -270,12 +297,40 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
             unsafe { std::mem::transmute(res) }
         },
         "border",
+        (0, 0),
     );
     e.set_on_hover_func(|holder: &mut Element, _, _, _| {
         if holder.args.len() >= 2 {
-            if holder.args.iter().nth(1).unwrap().as_object().unwrap_or(&Map::new()).contains_key("onhover") {
-                let color: Value = holder.args.get(1).unwrap().as_object().unwrap().get("onhover").unwrap().as_object().unwrap().get("color").unwrap_or(&json!("default")).clone();
-                holder.args.iter_mut().nth(1).unwrap().as_object_mut().unwrap().insert("color".to_string(), color);
+            if holder
+                .args
+                .iter()
+                .nth(1)
+                .unwrap()
+                .as_object()
+                .unwrap_or(&Map::new())
+                .contains_key("onhover")
+            {
+                let color: Value = holder
+                    .args
+                    .get(1)
+                    .unwrap()
+                    .as_object()
+                    .unwrap()
+                    .get("onhover")
+                    .unwrap()
+                    .as_object()
+                    .unwrap()
+                    .get("color")
+                    .unwrap_or(&json!("default"))
+                    .clone();
+                holder
+                    .args
+                    .iter_mut()
+                    .nth(1)
+                    .unwrap()
+                    .as_object_mut()
+                    .unwrap()
+                    .insert("color".to_string(), color);
             }
         }
     });

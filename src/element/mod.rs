@@ -2,7 +2,7 @@ use crate::{content::Content, page::Page};
 
 pub mod registry;
 use serde_json::Value;
-use std::fmt::Debug;
+use std::{fmt::Debug};
 
 pub mod border;
 pub mod group;
@@ -42,7 +42,7 @@ pub struct Element {
         timer: &u32,
     ),
     size: Option<(u16, u16)>,
-    position: Option<(u16, u16)>,
+    position: (u16, u16),
 }
 
 impl Element {
@@ -57,6 +57,7 @@ impl Element {
         args: Vec<Value>,
         prepare_children_function: fn(&Vec<Value>, &Page) -> Vec<Element>,
         element_tag: &'static str,
+        position: (u16, u16),
     ) -> Self {
         Element {
             render_func,
@@ -66,7 +67,7 @@ impl Element {
             element_tag,
             on_hover_func: |_, _, _, _| {},
             size: None,
-            position: None,
+            position: position,
         }
     }
     pub fn new_default(
@@ -87,7 +88,7 @@ impl Element {
             element_tag,
             on_hover_func: |_, _, _, _| {},
             size: None,
-            position: None,
+            position: (0, 0),
         }
     }
     pub fn new_from(&self, args: Vec<Value>) -> Self {
@@ -132,7 +133,7 @@ impl Element {
         self.size
     }
 
-    pub fn get_position(&self) -> Option<(u16, u16)> {
+    pub fn get_position(&self) -> (u16, u16) {
         self.position
     }
 }
@@ -144,6 +145,7 @@ impl Debug for Element {
             .field("children", &self.children)
             .field("element_tag", &self.element_tag)
             .field("size", &self.size)
+            .field("position", &self.position)
             .finish()
     }
 }

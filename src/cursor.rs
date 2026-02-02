@@ -20,9 +20,7 @@ impl Cursor {
         &self.position
     }
 
-    #[allow(unused)]
     pub fn handle_interaction(&mut self, page: &mut Page) {
-        todo!();
         let mut queue = VecDeque::new();  
         for element in page.body.iter_mut() {
             queue.push_back(element);
