@@ -3,6 +3,8 @@ pub mod page;
 pub mod cursor;
 pub mod content;
 pub mod parse;
+pub mod logger;
+pub mod hovered_vec;
 
 use crate::element::{registry::ElementRegistry};
 

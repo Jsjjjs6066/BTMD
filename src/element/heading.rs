@@ -1,4 +1,4 @@
-use std::{cmp::{max, min}, fs::OpenOptions, io::Write};
+use std::{cell::RefCell, cmp::{max, min}};
 
 use crossterm::style::Color;
 use figlet_rs::FIGfont;
@@ -12,7 +12,7 @@ use crate::{
 
 pub static HEADING: LazyLock<Element> = LazyLock::new(|| {
     Element::new_default(
-        |_, _, args: Vec<Value>, parent_size: &(u16, u16), timer: &u32| {
+        |holder: &mut Element, _, args: Vec<Value>, parent_size: &(u16, u16), timer: &u32, _| {
             let font: FIGfont = FIGfont::standard().unwrap();
             let heading: String = font
                 .convert(
@@ -69,8 +69,9 @@ pub static HEADING: LazyLock<Element> = LazyLock::new(|| {
                     width,
                     height,
                 ),
+                RefCell::new(holder.to_owned()),
             )
         },
-        "heading".to_string(),
+        "heading",
     )
 });

@@ -1,16 +1,16 @@
-use serde_json::Value;
-use std::sync::LazyLock;
+use std::{cell::RefCell, sync::LazyLock};
 
 use crate::{content::{Content, Text}, element::Element};
 
 pub static NEW_LINE: LazyLock<Element> = LazyLock::new(||
     Element::new_default(
-        |_, _, _, _, _| {
+        |holder, _, _, _, _, _| {
             Content::new(
                 vec![Text::new_default("\n".to_string())],
                 false,
-                (0, 0)
+                (0, 0),
+                RefCell::new(holder.to_owned()),
             )
-        }, "new_line".to_string()
+        }, "new_line"
     )
 );
