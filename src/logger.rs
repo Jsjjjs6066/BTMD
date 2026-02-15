@@ -1,7 +1,7 @@
 use std::fs::{File, OpenOptions, create_dir};
 use std::io::{Result, Write};
 use std::path::Path;
-use std::sync::{LazyLock, RwLock};
+use std::sync::{Arc, LazyLock, RwLock};
 
 use crate::element::Element;
 
@@ -14,7 +14,7 @@ static LOG_FILE: LazyLock<RwLock<Result<File>>> = LazyLock::new(|| {
     RwLock::new(
         OpenOptions::new()
             .write(true)
-            .truncate(true)
+            .append(true)
             .read(true)
             .create(true)
             .open(Path::new(LOG_DIR).join(Path::new(LOG_FILE_NAME))),
@@ -27,19 +27,22 @@ static PAGE_LOG_FILE: LazyLock<RwLock<Result<File>>> = LazyLock::new(|| {
         OpenOptions::new()
             .create(true)
             .write(true)
-            .truncate(true)
+            .append(true)
             .read(true)
             .open(Path::new(LOG_DIR).join(Path::new(PAGE_LOG_FILE_NAME))),
     )
 });
 
 pub fn write_log(s: &[u8]) -> Result<()> {
-    LOG_FILE.write().unwrap().as_mut().unwrap().write_all(s)?;
-    LOG_FILE.write().unwrap().as_mut().unwrap().write_all("\n".as_bytes())?;
+    let mut file_guard = LOG_FILE.write().unwrap();
+    let file = file_guard.as_mut().unwrap();
+    file.write_all(s)?;
+    file.write_all("\n".as_bytes())?;
+    file.flush()?;
     Ok(())
 }
 
-pub fn write_page(page_body: &Vec<Element>) -> Result<()> {
+pub fn write_page(page_body: &Vec<Arc<RwLock<Element>>>) -> Result<()> {
     PAGE_LOG_FILE
         .write()
         .unwrap()

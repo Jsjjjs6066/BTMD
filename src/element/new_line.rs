@@ -4,7 +4,7 @@ use crate::{content::{Content, Text}, element::Element};
 
 pub static NEW_LINE: LazyLock<Element> = LazyLock::new(||
     Element::new_default(
-        |holder, _, _, _, _| {
+        |holder, _, _, _, _, _| {
             Content::new(
                 vec![Text::new_default("\n".to_string())],
                 false,

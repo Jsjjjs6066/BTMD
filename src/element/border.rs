@@ -9,7 +9,10 @@ use crate::{
 };
 
 use crossterm::style::Color;
-use std::{cell::RefCell, sync::LazyLock};
+use std::{
+    cell::RefCell,
+    sync::{Arc, LazyLock, RwLock},
+};
 
 pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
     let mut e = Element::new(
@@ -17,7 +20,8 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
          page: &mut Page,
          args: Vec<Value>,
          parent_size: &(u16, u16),
-         timer: &u32| {
+         timer: &u32,
+         pos: (u32, u32)| {
             let mut default_config: Map<String, Value> = Map::new();
             default_config.insert("min-height".to_string(), Value::Number(0.into()));
             default_config.insert("connect-to-horizontal-chars".to_string(), Value::Bool(true));
@@ -79,45 +83,36 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
             );
 
             let mut i = 1;
-
-            let mut rendered_content: Vec<Content> = Vec::new();
-            for element in holder.children.iter_mut() {
-                rendered_content.push(element.render(
-                    page,
-                    &(parent_size.0 - 2, parent_size.1 - 2),
-                    timer,
-                ));
-                if let Some(e) = rendered_content.iter().nth_back(1) {
-                    rendered_content.last_mut().unwrap().position = Some((
-                        e.position.unwrap_or_default().0 + e.size.0 % (parent_size.1 - 2),
-                        e.position.unwrap_or_default().1 + e.size.1,
-                    ));
-                    // let mut bw = BufWriter::new(File::create("debug.log").unwrap());
-                    // bw.write_all(format!("{:#?}", rendered_content.last().unwrap().position).as_bytes()).unwrap();
-                    // bw.flush().unwrap();
-                    
-                }
-                else {
-                    rendered_content.last_mut().unwrap().position = Some((0, 0));
-                }
-                let pos = rendered_content.last().unwrap().position.unwrap();
-                rendered_content
-                    .last()
-                    .unwrap()
-                    .holder
-                    .borrow_mut()
-                    .position = pos;
-                element.position = pos;
-                logger::write_log(format!("{:#?}", element.position).as_bytes()).unwrap();
-            }
-
             let mut lines: u16 = 1;
 
-            for c in rendered_content.into_iter() {
-                for t in &c.text {
+            let mut rendered_content: Vec<Content> = Vec::new();
+            for element_rc in holder.children.iter() {
+                let mut element = element_rc.write().unwrap();
+                if (i + 1) % width as u32 == 0 {
+                    rendered_content.push(element.render(
+                        page,
+                        &(parent_size.0 - 2, parent_size.1 - 2),
+                        timer,
+                        (
+                            (i + 2) % parent_size.0 as u32 + pos.0 as u32,
+                            lines as u32 + 1 + pos.1,
+                        ),
+                    ));
+                } else {
+                    rendered_content.push(element.render(
+                        page,
+                        &(parent_size.0 - 2, parent_size.1 - 2),
+                        timer,
+                        (
+                            i % parent_size.0 as u32 + pos.0 as u32,
+                            lines as u32 + pos.1,
+                        ),
+                    ));
+                }
+                for t in &rendered_content.last().unwrap().text {
                     let mut temp: String = String::new();
                     for char in t.text.chars() {
-                        if (i + 1) % width == 0 {
+                        if (i + 1) % width as u32 == 0 {
                             if border_builder
                                 .content
                                 .last()
@@ -156,7 +151,7 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
                             i += 2;
                             lines += 1;
                         }
-                        if (i - 1) % width == 0
+                        if (i - 1) % width as u32 == 0
                             && char == horizontal_char
                             && should_connect_to_horizontal_chars
                         {
@@ -164,9 +159,9 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
                             border_builder.content.last_mut().unwrap().text.push('├');
                         }
                         if char == '\n' {
-                            if i % width != 1 {
-                                temp.push_str(&*" ".repeat(width - 2 - (i - 1) % width));
-                                i += width - 2 - (i - 1) % width;
+                            if i % width as u32 != 1 {
+                                temp.push_str(&*" ".repeat(width - 2 - (i as usize - 1) % width));
+                                i += width as u32 - 2 - (i - 1) % width as u32;
                                 border_builder.append_text(
                                     temp,
                                     t.foreground_color,
@@ -182,9 +177,9 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
                                 lines += 1;
                             }
                         } else if char == '\t' {
-                            let spaces: usize = 4 - (i - 1) % 4;
+                            let spaces: usize = 4 - (i as usize - 1) % 4;
                             temp.push_str(&*" ".repeat(spaces));
-                            i += spaces;
+                            i += spaces as u32;
                         } else {
                             temp.push(char);
                             i += 1;
@@ -196,7 +191,7 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
                 }
             }
 
-            if (i - 1) % width == 0 {
+            if (i - 1) % width as u32 == 0 {
                 while let Some(last) = border_builder
                     .content
                     .last_mut()
@@ -212,7 +207,7 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
                 lines -= 1;
             }
 
-            if (i - 1) % width == 0 {
+            if (i - 1) % width as u32 == 0 {
                 if border_builder.content.len() > 1 {
                     let ind: usize = border_builder.content.len() - 1;
                     border_builder.content[ind].text.pop();
@@ -222,9 +217,10 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
                 i -= 1;
             }
 
-            if !(i % width == 0) {
-                border_builder
-                    .append_text_default((&*" ".repeat(width - 1 - i % width)).to_string());
+            if !(i % width as u32 == 0) {
+                border_builder.append_text_default(
+                    (&*" ".repeat(width - 1 - i as usize % width)).to_string(),
+                );
                 if border_builder.content[border_builder.content.len() - 2]
                     .text
                     .chars()
@@ -284,7 +280,7 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
             )
         },
         vec![],
-        |args: &Vec<Value>, page: &Page| {
+        |args: &Vec<Value>, page: &Page| -> Vec<Arc<RwLock<Element>>> {
             let res = parse_vec_to_vec(
                 (*args
                     .get(0)
@@ -294,12 +290,12 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
                 .clone(),
                 &page.registry,
             );
-            unsafe { std::mem::transmute(res) }
+            res
         },
         "border",
         (0, 0),
     );
-    e.set_on_hover_func(|holder: &mut Element, _, _, _| {
+    e.set_on_hover_func(|holder: &mut Element, _| {
         if holder.args.len() >= 2 {
             if holder
                 .args
@@ -333,6 +329,7 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
                     .insert("color".to_string(), color);
             }
         }
+        logger::write_log("hovered".as_bytes()).unwrap();
     });
     e
 });

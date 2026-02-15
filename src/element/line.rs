@@ -6,7 +6,7 @@ use std::{cell::RefCell, sync::LazyLock};
 
 pub static LINE: LazyLock<Element> = LazyLock::new(|| 
     Element::new_default(
-        |holder, _, args: Vec<Value>, parent_size: &(u16, u16), _| {
+        |holder, _, args: Vec<Value>, parent_size: &(u16, u16), _, _| {
             let char: String = args.get(0).unwrap_or(&Value::String("─".to_string()))
             .as_str().unwrap_or("─").chars().last().unwrap_or('─')
             .to_string();

@@ -12,7 +12,7 @@ use crate::{
 
 pub static HEADING: LazyLock<Element> = LazyLock::new(|| {
     Element::new_default(
-        |holder: &mut Element, _, args: Vec<Value>, parent_size: &(u16, u16), timer: &u32| {
+        |holder: &mut Element, _, args: Vec<Value>, parent_size: &(u16, u16), timer: &u32, _| {
             let font: FIGfont = FIGfont::standard().unwrap();
             let heading: String = font
                 .convert(
