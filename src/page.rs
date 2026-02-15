@@ -51,7 +51,7 @@ impl Page {
         let x: u16 = self.cursor.position.0;
         let y: u16 = self.cursor.position.1;
 
-        x + 1 >= start_x && x <= start_x + size_x - 1 && y + 1 >= start_y && y <= start_y + size_y - 1
+        x >= start_x && x <= start_x + size_x - 1 && y >= start_y && y <= start_y + size_y - 1
     }
 
     pub fn handle_cursor_interaction(&mut self) {
