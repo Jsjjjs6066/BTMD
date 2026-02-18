@@ -3,7 +3,7 @@ use crate::{
     import_default_elements,
     page::Page,
 };
-use serde_json::Value;
+use serde_jsonc::Value;
 use std::sync::{Arc, RwLock};
 
 pub fn parse_json_to_page(json_page: Value) -> Page {
@@ -30,7 +30,7 @@ pub fn parse_json_to_page(json_page: Value) -> Page {
     Page::new(title, body, json_page["body"].clone(), registry)
 }
 pub fn parse_str_to_page(input: &str) -> Page {
-    let json_page: Value = serde_json::from_str(input).unwrap();
+    let json_page: Value = serde_jsonc::from_str(input).unwrap();
     parse_json_to_page(json_page)
 }
 
@@ -55,7 +55,7 @@ pub fn parse_vec_to_vec(
     body
 }
 pub fn parse_str_to_vec(input: &str, registry: &ElementRegistry) -> Vec<Arc<RwLock<Element>>> {
-    let elements: Vec<Value> = serde_json::from_str(input)
+    let elements: Vec<Value> = serde_jsonc::from_str(input)
         .unwrap_or(Value::Array(vec![]))
         .as_array()
         .unwrap_or(&Vec::new())

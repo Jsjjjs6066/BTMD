@@ -1,4 +1,4 @@
-use serde_json::{Map, Value};
+use serde_jsonc::{Map, Value};
 use std::cell::RefCell;
 use std::sync::{Arc, LazyLock, RwLock};
 

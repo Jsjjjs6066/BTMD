@@ -1,4 +1,4 @@
-use serde_json::{Map, Value, json};
+use serde_jsonc::{Map, Value, json};
 
 use crate::{
     content::{Content, ContentBuilder},

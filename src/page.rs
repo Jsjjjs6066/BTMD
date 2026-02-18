@@ -1,4 +1,4 @@
-use serde_json::Value;
+use serde_jsonc::Value;
 
 use crate::{
     cursor::Cursor,

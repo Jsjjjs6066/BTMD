@@ -2,7 +2,7 @@ use crate::logger;
 use crate::{content::Content, page::Page};
 
 pub mod registry;
-use serde_json::Value;
+use serde_jsonc::Value;
 use std::fmt::Debug;
 
 pub mod border;

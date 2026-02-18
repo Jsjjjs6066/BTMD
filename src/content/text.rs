@@ -32,3 +32,9 @@ impl Text {
         )
     }
 }
+
+impl Default for Text {
+    fn default() -> Self {
+        Self {text: Default::default(), foreground_color: Color::Reset, background_color: Color::Reset}
+    }
+}

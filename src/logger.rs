@@ -27,7 +27,6 @@ static PAGE_LOG_FILE: LazyLock<RwLock<Result<File>>> = LazyLock::new(|| {
         OpenOptions::new()
             .create(true)
             .write(true)
-            .append(true)
             .read(true)
             .open(Path::new(LOG_DIR).join(Path::new(PAGE_LOG_FILE_NAME))),
     )
