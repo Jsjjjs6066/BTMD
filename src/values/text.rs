@@ -1,11 +1,11 @@
 use serde_jsonc::{Value, to_string};
 
 use crate::{
-    config::{ValueType, ValueTypes},
+    values::{ValueType, ValueTypes},
     content::Text,
 };
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Debug)]
 pub struct TextType(pub Text);
 
 impl ValueType for TextType {

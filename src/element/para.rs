@@ -2,22 +2,20 @@ use serde_jsonc::Value;
 use std::{cell::RefCell, cmp::min};
 
 use crate::{
-    args::{self, ArgTypes, get_arg},
-    args_parser,
-    content::Content,
-    element::Element,
+    args_parser, config_preset, content::Content, element::Element, values::{ConfigType, TextType, ValueTypes}
 };
-use btmd_macro::unwrap_arg;
+use btmd_macro::unwrap_val;
 
 use std::sync::LazyLock;
 
 pub static PARA: LazyLock<Element> = LazyLock::new(|| {
     Element::new_default(
         |holder, _, args: Vec<Value>, parent_size: &(u16, u16), _, _| {
-            let arg_parser = args_parser!(get_arg("text"), get_arg("config"));
+            let config_preset = config_preset!();
+            let arg_parser = args_parser!(ValueTypes::Text(Default::default()), ValueTypes::Config(ConfigType(config_preset, Default::default())));
             let args_parsed = arg_parser.parse(args);
-            let text: args::TextType = unwrap_arg!(args_parsed.first().unwrap(), Text);
-            let _config: args::ConfigType = unwrap_arg!(args_parsed.last().unwrap(), Config);
+            let text: TextType = unwrap_val!(args_parsed.first().unwrap(), Text);
+            let _config: ConfigType = unwrap_val!(args_parsed.last().unwrap(), Config);
             Content::new(
                 vec![text.0.clone()],
                 false,

@@ -3,7 +3,6 @@ use serde_jsonc::{Map, Value, json};
 use crate::{
     content::{Content, ContentBuilder},
     element::Element,
-    logger,
     page::Page,
     parse::parse_vec_to_vec,
 };
@@ -329,7 +328,6 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
                     .insert("color".to_string(), color);
             }
         }
-        logger::write_log("hovered".as_bytes()).unwrap();
     });
     e
 });

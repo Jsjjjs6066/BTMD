@@ -1,37 +1,10 @@
 pub mod config_parser;
-pub mod null;
-pub mod text;
-pub use null::NullType;
-pub use text::TextType;
 
-use enum_dispatch::enum_dispatch;
-use serde_jsonc::Value;
 use std::collections::HashMap;
 
-#[enum_dispatch]
-pub trait ValueType {
-    fn parse(&self, value: &Value) -> ValueTypes;
-}
+use crate::values::ValueTypes;
 
-#[enum_dispatch(ValueType)]
-#[derive(Clone)]
-pub enum ValueTypes {
-    Null(NullType),
-    Text(TextType),
-}
-
-impl Default for ValueTypes {
-    fn default() -> Self {
-        ValueTypes::Null(NullType)
-    }
-}
-impl Default for &ValueTypes {
-    fn default() -> Self {
-        &ValueTypes::Null(NullType)
-    }
-}
-
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Debug)]
 pub struct ConfigPreset {
     map: HashMap<String, ValueTypes>,
 }
@@ -50,4 +23,20 @@ impl ConfigPreset {
     pub fn get_type(&self, key: &str) -> &ValueTypes {
         self.map.get(key).unwrap_or(Default::default())
     }
+}
+
+#[macro_export]
+macro_rules! config_preset {
+    ($($key:expr => $value:expr),*) => {
+        {
+            use crate::config::ConfigPreset;
+            #[allow(unused_mut)]
+            // Must be mutable to add values,
+            // but compiler states it does 
+            // not need to be mutable
+            let mut preset = ConfigPreset::new();
+            $(preset.add_value($key.to_string(), $value););*
+            preset
+        }
+    };
 }

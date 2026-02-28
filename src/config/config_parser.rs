@@ -2,7 +2,8 @@ use std::collections::HashMap;
 
 use serde_jsonc::{Map, Value};
 
-use crate::config::{ConfigPreset, ValueType, ValueTypes};
+use crate::config::ConfigPreset;
+use crate::values::{ValueType, ValueTypes};
 
 #[derive(Clone, Default)]
 pub struct ConfigParser {

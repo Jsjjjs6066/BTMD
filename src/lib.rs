@@ -7,6 +7,8 @@ pub mod logger;
 pub mod page;
 pub mod parse;
 pub mod args;
+pub mod int;
+pub mod values;
 
 use crate::element::registry::ElementRegistry;
 

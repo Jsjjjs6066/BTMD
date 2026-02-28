@@ -1,8 +1,8 @@
 use serde_jsonc::Value;
 
-use crate::config::{ValueType, ValueTypes};
+use crate::values::{ValueType, ValueTypes};
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Debug)]
 pub struct NullType;
 
 impl ValueType for NullType {
