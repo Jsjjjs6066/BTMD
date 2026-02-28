@@ -14,19 +14,19 @@ impl ArgParser {
         }
     }
 
-    pub fn parse(&self, vec: Vec<Value>) -> Vec<ValueTypes> {
-        let mut v = self.preset.vec.clone();
-        let mut vec_iter = vec.iter()
+    pub fn parse(&self, vec_to_parse: Vec<Value>) -> Vec<ValueTypes> {
+        let mut vec_preset = self.preset.vec.clone();
+        let mut vec_to_parse_iter = vec_to_parse.iter()
             .map(Some)
             .chain(std::iter::repeat_with(|| None));
-        for (val1, val2) in v.iter_mut().zip(vec_iter.by_ref()) {
-            if let None = val2 {
-                *val1 = val1.parse(&Value::Null);
+        for (vec_preset_val, vec_to_parse_val) in vec_preset.iter_mut().zip(vec_to_parse_iter.by_ref()) {
+            if let None = vec_to_parse_val {
+                *vec_preset_val = vec_preset_val.parse(&Value::Null);
                 continue;
             }
-            let val1u = val1.parse(val2.unwrap());
-            *val1 = val1u;
+            let val1u = vec_preset_val.parse(vec_to_parse_val.unwrap());
+            *vec_preset_val = val1u;
         }
-        v
+        vec_preset
     }
 }

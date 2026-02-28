@@ -2,11 +2,13 @@ pub mod config;
 pub mod int;
 pub mod null;
 pub mod text;
+pub mod char;
 
 pub use config::ConfigType;
 pub use int::IntType;
 pub use null::NullType;
 pub use text::TextType;
+pub use char::CharType;
 
 use btmd_macro::ConfigLookup;
 use enum_dispatch::enum_dispatch;
@@ -28,6 +30,8 @@ pub enum ValueTypes {
     Int(IntType),
     #[config_def("config")]
     Config(ConfigType),
+    #[config_def("char")]
+    Char(CharType),
 }
 
 impl Default for ValueTypes {

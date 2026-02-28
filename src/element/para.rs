@@ -15,7 +15,7 @@ pub static PARA: LazyLock<Element> = LazyLock::new(|| {
             let arg_parser = args_parser!(ValueTypes::Text(Default::default()), ValueTypes::Config(ConfigType(config_preset, Default::default())));
             let args_parsed = arg_parser.parse(args);
             let text: TextType = unwrap_val!(args_parsed.first().unwrap(), Text);
-            let _config: ConfigType = unwrap_val!(args_parsed.last().unwrap(), Config);
+            let _config: ConfigType = unwrap_val!(args_parsed.get(1).unwrap(), Config);
             Content::new(
                 vec![text.0.clone()],
                 false,

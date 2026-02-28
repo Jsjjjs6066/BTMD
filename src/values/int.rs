@@ -55,7 +55,7 @@ impl Int {
                 Int::Bit16U(_) => Int::Bit16U(n.as_u64().unwrap() as u16),
                 Int::Bit8U(_) => Int::Bit8U(n.as_u64().unwrap() as u8),
             },
-            _ => Int::default(),
+            _ => size,
         }
     }
 }
