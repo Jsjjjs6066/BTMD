@@ -9,7 +9,7 @@ use serde_jsonc::Value;
 use {std::sync::LazyLock, usize};
 
 use crate::{
-    args_parser, config_preset, content::{Content, Text}, element::Element, int::Int, values::{ConfigType, IntType, TextType, ValueTypes}
+    args_parser, config_preset, content::{Content, Text}, element::Element, values::{ConfigType, IntType, TextType, ValueTypes, int::Int}
 };
 
 pub static HEADING: LazyLock<Element> = LazyLock::new(|| {
