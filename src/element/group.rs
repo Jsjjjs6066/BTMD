@@ -1,8 +1,12 @@
-use serde_json::{Map, Value};
+use btmd_macro::unwrap_val;
+use serde_jsonc::Value;
 use std::cell::RefCell;
 use std::sync::{Arc, LazyLock, RwLock};
 
 use crate::content::ContentBuilder;
+use crate::values::ValueTypes::{Array, Config};
+use crate::values::{ArrayType, ConfigType, ValueTypes};
+use crate::{args_parser, config_preset};
 use crate::{content::Content, element::Element, page::Page, parse::parse_vec_to_vec};
 
 pub static GROUP: LazyLock<Element> = LazyLock::new(|| {
@@ -13,18 +17,13 @@ pub static GROUP: LazyLock<Element> = LazyLock::new(|| {
          parent_size: &(u16, u16),
          timer: &u32,
          pos: (u32, u32)| {
-            let mut default_config: Map<String, Value> = Map::new();
-            let config: Map<String, Value> = args
-                .get(1)
-                .unwrap_or(&Value::Object(Map::new()))
-                .as_object()
-                .unwrap_or(&default_config)
-                .iter()
-                .map(|(k, v)| (k.clone(), v.clone()))
-                .collect();
-            for (k, v) in config.iter() {
-                default_config.insert(k.clone(), v.clone());
-            }
+            let config_preset = config_preset!();
+            let arg_parser = args_parser!(Array(ArrayType {
+                array: vec![],
+                vec_type: Box::new(ValueTypes::Element(Default::default())),
+            }), Config(ConfigType(config_preset, Default::default())));
+            let args_parsed = arg_parser.parse(args);
+            let _config: ConfigType = unwrap_val!(args_parsed.get(1).unwrap(), Config);
 
             let width: i32 = parent_size.0 as i32;
 

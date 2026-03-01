@@ -1,6 +1,6 @@
 use crossterm::style::{Color, SetBackgroundColor, SetForegroundColor};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Text {
     pub text: String,
     pub foreground_color: Color,
@@ -30,5 +30,11 @@ impl Text {
             self.text,
             SetBackgroundColor(self.background_color)
         )
+    }
+}
+
+impl Default for Text {
+    fn default() -> Self {
+        Self {text: Default::default(), foreground_color: Color::Reset, background_color: Color::Reset}
     }
 }

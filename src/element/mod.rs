@@ -1,8 +1,7 @@
-use crate::logger;
 use crate::{content::Content, page::Page};
 
 pub mod registry;
-use serde_json::Value;
+use serde_jsonc::Value;
 use std::fmt::Debug;
 
 pub mod border;
@@ -28,7 +27,6 @@ pub use para::PARA;
 static DEFAULT_ON_HOVER_REVERT_FUNC: fn(holder: &mut Element, page: &mut Page) =
     |holder: &mut Element, _| {
         holder.args = holder.raw_args.clone();
-        logger::write_log(format!("{:#?}", holder).as_bytes()).unwrap();
     };
 
 #[derive(Clone)]

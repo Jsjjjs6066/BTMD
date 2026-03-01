@@ -1,11 +1,14 @@
-use serde_json::{Map, Value, json};
+use btmd_macro::unwrap_val;
+use serde_jsonc::Value;
 
 use crate::{
+    args_parser, config_preset,
     content::{Content, ContentBuilder},
     element::Element,
     logger,
     page::Page,
     parse::parse_vec_to_vec,
+    values::{ArrayType, BoolType, ConfigType, SizeType, ValueTypes, int::Int},
 };
 
 use crossterm::style::Color;
@@ -22,40 +25,65 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
          parent_size: &(u16, u16),
          timer: &u32,
          pos: (u32, u32)| {
-            let mut default_config: Map<String, Value> = Map::new();
-            default_config.insert("min-height".to_string(), Value::Number(0.into()));
-            default_config.insert("connect-to-horizontal-chars".to_string(), Value::Bool(true));
-            default_config.insert("color".to_string(), Value::String("default".to_string()));
-            let config: Map<String, Value> = args
-                .get(1)
-                .unwrap_or(&Value::Object(Map::new()))
-                .as_object()
-                .unwrap_or(&default_config)
-                .iter()
-                .map(|(k, v)| (k.clone(), v.clone()))
-                .collect();
-            for (k, v) in config.iter() {
-                default_config.insert(k.clone(), v.clone());
-            }
+            let config_preset = config_preset!(
+                "min-height" => ValueTypes::Size(SizeType {
+                    size: Int::Bit16U(0),
+                    min: Int::Bit16U(0),
+                    max: Int::Bit16U(parent_size.1 - 2),
+                    auto: Int::Bit16U(0),
+                }),
+                "connect-to-horizontal-chars" => ValueTypes::Bool(BoolType { value: true }),
+                "color" => ValueTypes::Color(Default::default())
+            );
+            let arg_parser = args_parser!(
+                ValueTypes::Array(ArrayType {
+                    array: vec![],
+                    vec_type: Box::new(ValueTypes::Element(Default::default()))
+                }),
+                ValueTypes::Config(ConfigType(config_preset, Default::default()))
+            );
+            let args_parsed = arg_parser.parse(args);
+            let config: ConfigType = unwrap_val!(args_parsed.get(1).unwrap(), Config);
+            let min_height: u16 = unwrap_val!(config.1.get("min-height").unwrap(), Size)
+                .size
+                .into();
+            let connect_to_horizontal_chars: bool =
+                unwrap_val!(config.1.get("connect-to-horizontal-chars").unwrap(), Bool).value;
+            let color: Color = unwrap_val!(config.1.get("color").unwrap(), Color).value;
+            // let mut default_config: Map<String, Value> = Map::new();
+            // default_config.insert("min-height".to_string(), Value::Number(0.into()));
+            // default_config.insert("connect-to-horizontal-chars".to_string(), Value::Bool(true));
+            // default_config.insert("color".to_string(), Value::String("default".to_string()));
+            // let config: Map<String, Value> = args
+            //     .get(1)
+            //     .unwrap_or(&Value::Object(Map::new()))
+            //     .as_object()
+            //     .unwrap_or(&default_config)
+            //     .iter()
+            //     .map(|(k, v)| (k.clone(), v.clone()))
+            //     .collect();
+            // for (k, v) in config.iter() {
+            //     default_config.insert(k.clone(), v.clone());
+            // }
 
-            if default_config.get("min-height").is_none() {
-                default_config.insert("min-height".to_string(), Value::Number(0.into()));
-            } else if default_config.get("min-height").unwrap().is_string() {
-                if default_config.get("min-height").unwrap().as_str().unwrap() == "auto" {
-                    default_config.insert("min-height".to_string(), Value::Number(0.into()));
-                } else if default_config.get("min-height").unwrap().as_str().unwrap() == "max" {
-                    default_config.insert(
-                        "min-height".to_string(),
-                        Value::Number((parent_size.1 - 2).into()),
-                    );
-                }
-            }
+            // if default_config.get("min-height").is_none() {
+            //     default_config.insert("min-height".to_string(), Value::Number(0.into()));
+            // } else if default_config.get("min-height").unwrap().is_string() {
+            //     if default_config.get("min-height").unwrap().as_str().unwrap() == "auto" {
+            //         default_config.insert("min-height".to_string(), Value::Number(0.into()));
+            //     } else if default_config.get("min-height").unwrap().as_str().unwrap() == "max" {
+            //         default_config.insert(
+            //             "min-height".to_string(),
+            //             Value::Number((parent_size.1 - 2).into()),
+            //         );
+            //     }
+            // }
 
-            let should_connect_to_horizontal_chars: bool = default_config
-                .get("connect-to-horizontal-chars")
-                .unwrap_or(&Value::Bool(true))
-                .as_bool()
-                .unwrap_or(true);
+            // let should_connect_to_horizontal_chars: bool = default_config
+            //     .get("connect-to-horizontal-chars")
+            //     .unwrap_or(&Value::Bool(true))
+            //     .as_bool()
+            //     .unwrap_or(true);
 
             let width: usize = parent_size.0 as usize;
             let horizontal_char: char = '─';
@@ -66,11 +94,11 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
             let bottom_right: char = '┘';
             let mut border: String = String::new();
 
-            let color: &str = default_config
-                .get("color")
-                .and_then(|v| v.as_str())
-                .unwrap_or("default");
-            let color_prefix: Color = Color::try_from(color).unwrap_or(Color::Reset);
+            // let color: &str = default_config
+            //     .get("color")
+            //     .and_then(|v| v.as_str())
+            //     .unwrap_or("default");
+            // let color: Color = Color::try_from(color).unwrap_or(Color::Reset);
 
             let mut border_builder: ContentBuilder = ContentBuilder::new();
             border_builder.append_text(
@@ -78,7 +106,7 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
                     + &horizontal_char.to_string().repeat(width - 2)
                     + top_right.to_string().as_str()
                     + vertical_char.to_string().as_str(),
-                color_prefix,
+                color,
                 Color::Reset,
             );
 
@@ -122,7 +150,7 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
                                 .last()
                                 .unwrap_or(' ')
                                 == horizontal_char
-                                && should_connect_to_horizontal_chars
+                                && connect_to_horizontal_chars
                             {
                                 border_builder.append_text(
                                     temp,
@@ -131,7 +159,7 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
                                 );
                                 border_builder.append_text(
                                     '┤'.to_string() + vertical_char.to_string().as_str(),
-                                    color_prefix,
+                                    color,
                                     Color::Reset,
                                 );
                                 temp = String::new();
@@ -143,7 +171,7 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
                                 );
                                 border_builder.append_text(
                                     vertical_char.to_string() + vertical_char.to_string().as_str(),
-                                    color_prefix,
+                                    color,
                                     Color::Reset,
                                 );
                                 temp = String::new();
@@ -153,7 +181,7 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
                         }
                         if (i - 1) % width as u32 == 0
                             && char == horizontal_char
-                            && should_connect_to_horizontal_chars
+                            && connect_to_horizontal_chars
                         {
                             border_builder.content.last_mut().unwrap().text.pop();
                             border_builder.content.last_mut().unwrap().text.push('├');
@@ -169,7 +197,7 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
                                 );
                                 border_builder.append_text(
                                     vertical_char.to_string() + vertical_char.to_string().as_str(),
-                                    color_prefix,
+                                    color,
                                     Color::Reset,
                                 );
                                 temp = String::new();
@@ -227,37 +255,22 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
                     .last()
                     .unwrap_or(' ')
                     == horizontal_char
-                    && should_connect_to_horizontal_chars
+                    && connect_to_horizontal_chars
                 {
-                    border_builder.append_text('┤'.to_string(), color_prefix, Color::Reset);
+                    border_builder.append_text('┤'.to_string(), color, Color::Reset);
                 } else {
-                    border_builder.append_text(
-                        vertical_char.to_string(),
-                        color_prefix,
-                        Color::Reset,
-                    );
+                    border_builder.append_text(vertical_char.to_string(), color, Color::Reset);
                 }
             }
 
-            if lines
-                < default_config
-                    .get("min-height")
-                    .unwrap()
-                    .as_u64()
-                    .unwrap_or(0) as u16
-            {
-                let additional_lines: u16 = default_config
-                    .get("min-height")
-                    .unwrap()
-                    .as_u64()
-                    .unwrap_or(0) as u16
-                    - lines;
+            if lines < min_height {
+                let additional_lines: u16 = min_height.saturating_sub(lines);
                 for _ in 0..additional_lines {
                     border_builder.append_text(
                         vertical_char.to_string()
                             + &*" ".repeat(width - 2)
                             + vertical_char.to_string().as_str(),
-                        color_prefix,
+                        color,
                         Color::Reset,
                     );
                     lines += 1;
@@ -268,7 +281,7 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
                 bottom_left.to_string()
                     + &horizontal_char.to_string().repeat(width - 2)
                     + bottom_right.to_string().as_str(),
-                color_prefix,
+                color,
                 Color::Reset,
             );
             border.push_str(&horizontal_char.to_string().repeat(width - 2));
@@ -296,40 +309,66 @@ pub static BORDER: LazyLock<Element> = LazyLock::new(|| {
         (0, 0),
     );
     e.set_on_hover_func(|holder: &mut Element, _| {
-        if holder.args.len() >= 2 {
-            if holder
-                .args
-                .iter()
-                .nth(1)
-                .unwrap()
-                .as_object()
-                .unwrap_or(&Map::new())
-                .contains_key("onhover")
-            {
-                let color: Value = holder
-                    .args
-                    .get(1)
-                    .unwrap()
-                    .as_object()
-                    .unwrap()
-                    .get("onhover")
-                    .unwrap()
-                    .as_object()
-                    .unwrap()
-                    .get("color")
-                    .unwrap_or(&json!("default"))
-                    .clone();
-                holder
-                    .args
-                    .iter_mut()
-                    .nth(1)
-                    .unwrap()
-                    .as_object_mut()
-                    .unwrap()
-                    .insert("color".to_string(), color);
-            }
+        let config_preset = config_preset!(
+            "onhover" => ValueTypes::Config(ConfigType(
+                config_preset!(
+                    "color" => ValueTypes::Color(Default::default())
+                ),
+                Default::default()
+            ))
+        );
+        let arg_parser = args_parser!(
+            ValueTypes::Array(ArrayType {
+                array: Default::default(),
+                vec_type: Box::new(ValueTypes::Element(Default::default()))
+            }),
+            ValueTypes::Config(ConfigType(config_preset, Default::default()))
+        );
+        let args_parsed = arg_parser.parse(holder.args.to_owned());
+        let config: ConfigType = unwrap_val!(args_parsed.get(1).unwrap(), Config);
+        let onhover_config: ConfigType = unwrap_val!(config.1.get("onhover").unwrap(), Config);
+        logger::write_log_debug(args_parsed).unwrap();
+        let color: String = unwrap_val!(onhover_config.1.get("color").unwrap(), Color).into();
+        if holder.args.len() <= 1 {
+            holder.args.resize(2, Value::Object(Default::default()));
         }
-        logger::write_log("hovered".as_bytes()).unwrap();
+        holder.args[1]
+            .as_object_mut()
+            .unwrap()
+            .insert("color".to_string(), Value::String(color));
+        // if holder.args.len() >= 2 {
+        //     if holder
+        //         .args
+        //         .iter()
+        //         .nth(1)
+        //         .unwrap()
+        //         .as_object()
+        //         .unwrap_or(&Map::new())
+        //         .contains_key("onhover")
+        //     {
+        //         let color: Value = holder
+        //             .args
+        //             .get(1)
+        //             .unwrap()
+        //             .as_object()
+        //             .unwrap()
+        //             .get("onhover")
+        //             .unwrap()
+        //             .as_object()
+        //             .unwrap()
+        //             .get("color")
+        //             .unwrap_or(&json!("default"))
+        //             .clone();
+        //         holder
+        //             .args
+        //             .iter_mut()
+        //             .nth(1)
+        //             .unwrap()
+        //             .as_object_mut()
+        //             .unwrap()
+        //             .insert("color".to_string(), color);
+        //     }
+        // }
     });
     e
 });

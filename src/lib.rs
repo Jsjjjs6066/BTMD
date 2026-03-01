@@ -1,16 +1,19 @@
-pub mod element;
-pub mod page;
-pub mod cursor;
+pub mod config;
 pub mod content;
-pub mod parse;
-pub mod logger;
+pub mod cursor;
+pub mod element;
 pub mod hovered_vec;
+pub mod logger;
+pub mod page;
+pub mod parse;
+pub mod args;
+pub mod values;
 
-use crate::element::{registry::ElementRegistry};
+use crate::element::registry::ElementRegistry;
 
 pub fn import_default_elements(registry: &mut ElementRegistry) {
     registry.register_element("none".to_string(), &*element::NONE);
-    
+
     registry.register_element("para".to_string(), &*element::PARA);
     registry.add_alias("p".to_string(), "para");
     registry.add_alias("paragraph".to_string(), "para");
@@ -30,7 +33,7 @@ pub fn import_default_elements(registry: &mut ElementRegistry) {
     registry.add_alias("nl".to_string(), "new line");
     registry.add_alias("newline".to_string(), "new line");
     registry.add_alias("new_line".to_string(), "new line");
-    
+
     registry.register_element("group".to_string(), &*element::GROUP);
     registry.add_alias("g".to_string(), "group");
 }

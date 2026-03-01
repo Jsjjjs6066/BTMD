@@ -2,9 +2,15 @@ use std::collections::HashMap;
 
 use crate::element::Element;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ElementRegistry {
     registry: HashMap<String, Element>,
+}
+
+impl Default for ElementRegistry {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl ElementRegistry {
