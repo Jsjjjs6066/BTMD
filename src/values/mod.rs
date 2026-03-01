@@ -1,14 +1,18 @@
+pub mod array;
+pub mod char;
 pub mod config;
+pub mod element;
 pub mod int;
 pub mod null;
 pub mod text;
-pub mod char;
 
+pub use array::ArrayType;
+pub use char::CharType;
 pub use config::ConfigType;
+pub use element::ElementType;
 pub use int::IntType;
 pub use null::NullType;
 pub use text::TextType;
-pub use char::CharType;
 
 use btmd_macro::ConfigLookup;
 use enum_dispatch::enum_dispatch;
@@ -32,6 +36,10 @@ pub enum ValueTypes {
     Config(ConfigType),
     #[config_def("char")]
     Char(CharType),
+    #[config_def("element")]
+    Element(ElementType),
+    #[config_def("array")]
+    Array(ArrayType),
 }
 
 impl Default for ValueTypes {
@@ -42,5 +50,13 @@ impl Default for ValueTypes {
 impl Default for &ValueTypes {
     fn default() -> Self {
         &ValueTypes::Null(NullType)
+    }
+}
+
+pub fn enforce_type(value: ValueTypes, type_: &ValueTypes) -> Option<ValueTypes> {
+    if std::mem::discriminant(&value) == std::mem::discriminant(type_) {
+        Some(value)
+    } else {
+        None
     }
 }
