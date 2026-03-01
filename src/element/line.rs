@@ -2,7 +2,7 @@ use btmd_macro::unwrap_val;
 use serde_jsonc::Value;
 
 use crate::{
-    args_parser, config_preset, content::{Content, Text}, element::Element, logger, values::{CharType, ValueTypes}
+    args_parser, config_preset, content::{Content, Text}, element::Element, values::{CharType, ValueTypes}
 };
 
 use std::{cell::RefCell, sync::LazyLock};
@@ -15,7 +15,6 @@ pub static LINE: LazyLock<Element> = LazyLock::new(|| {
             let arg_parser = args_parser!(ValueTypes::Char(CharType('─')));
             let args_parsed = arg_parser.parse(args);
             let char: char = unwrap_val!(args_parsed.first().unwrap(), Char).0;
-            logger::write_log(format!("{:#?}", args_parsed).as_bytes()).unwrap();
             if char == '\n' {
                 return Content::new(
                     vec![Text::new_default("\n".to_string())],

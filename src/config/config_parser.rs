@@ -18,9 +18,15 @@ impl ConfigParser {
     }
 
     pub fn parse(&self, map: Map<String, Value>) -> HashMap<String, ValueTypes> {
-        let mut hm = self.preset.map.clone();
+        let mut hm = HashMap::new();
+        for (k, v) in &self.preset.map {
+            let input_val = map.get(k).unwrap_or(&Value::Null);
+            hm.insert(k.clone(), v.parse(input_val));
+        }
         for (k, v) in map {
-            hm.insert(k.clone(), hm.get(&k).unwrap_or_default().parse(&v));
+            if !hm.contains_key(&k) {
+                hm.insert(k.clone(), ValueTypes::default().parse(&v));
+            }
         }
         hm
     }

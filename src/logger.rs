@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use std::fs::{File, OpenOptions, create_dir};
 use std::io::{Result, Write};
 use std::path::Path;
@@ -49,4 +50,8 @@ pub fn write_page(page_body: &Vec<Arc<RwLock<Element>>>) -> Result<()> {
         .unwrap()
         .write_all(format!("{:#?}", page_body).as_bytes())?;
     Ok(())
+}
+
+pub fn write_log_debug(s: impl Debug) -> Result<()> {
+    write_log((format!("{:#?}", s)).as_bytes())
 }

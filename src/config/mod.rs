@@ -35,7 +35,7 @@ macro_rules! config_preset {
             // but compiler states it does 
             // not need to be mutable
             let mut preset = ConfigPreset::new();
-            $(preset.add_value($key.to_string(), $value););*
+            $(preset.add_value($key.to_string(), $value);)*
             preset
         }
     };

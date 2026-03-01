@@ -23,7 +23,7 @@ pub static GROUP: LazyLock<Element> = LazyLock::new(|| {
                 vec_type: Box::new(ValueTypes::Element(Default::default())),
             }), Config(ConfigType(config_preset, Default::default())));
             let args_parsed = arg_parser.parse(args);
-            let _config: ConfigType = unwrap_val!(args_parsed.first().unwrap(), Config);
+            let _config: ConfigType = unwrap_val!(args_parsed.get(1).unwrap(), Config);
 
             let width: i32 = parent_size.0 as i32;
 
